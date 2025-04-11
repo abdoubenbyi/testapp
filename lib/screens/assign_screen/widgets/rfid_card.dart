@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:idna_food/widgets/custom_text.dart';
 
 class RfidCard extends StatelessWidget {
-  const RfidCard({super.key, required this.uid});
+  const RfidCard({super.key, required this.uid, required this.onDelete});
   final String uid;
+  final VoidCallback onDelete;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -27,7 +28,9 @@ class RfidCard extends StatelessWidget {
               backgroundColor: Colors.transparent,
               overlayColor: Colors.transparent,
             ),
-            onPressed: () {},
+            onPressed: () {
+              onDelete();
+            },
             child: CustomText(
               text: 'Supprimer',
               weight: FontWeight.w600,

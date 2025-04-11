@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:idna_food/models/employee.dart';
+import 'dart:async';
 import 'package:idna_food/screens/assign_screen/employee_confirm.dart';
 import 'package:idna_food/screens/assign_screen/employee_list.dart';
 import 'package:idna_food/screens/assign_screen/widgets/rfid_card.dart';
@@ -18,6 +18,7 @@ class AssignScreen extends StatefulWidget {
 
 class _AssignScreenState extends State<AssignScreen> {
   ViewType viewType = ViewType.employeeList;
+  late Timer _cardFetchTimer;
 
   void toggleView() {
     setState(() {
@@ -28,24 +29,23 @@ class _AssignScreenState extends State<AssignScreen> {
     });
   }
 
-  static List<String> uids = [
-    '3216548765421321654',
-    '3216548765421321655',
-    '3216548765421321656',
-    '3216548765421321657',
-    '3216548765421321658',
-    '3216548765421321659',
-    '3216548765421321660',
-    '3216548765421321661',
-    '3216548765421321662',
-    '3216548765421321663',
-    '3216548765421321664',
-    '3216548765421321665',
-    '3216548765421321666',
-    '3216548765421321667',
-    '3216548765421321668',
-    '3216548765421321669',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    fetchCards();
+
+    // Start a periodic timer to fetch cards every second
+    _cardFetchTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      fetchCards();
+    });
+  }
+
+  @override
+  void dispose() {
+    // Cancel the timer when the widget is disposed
+    _cardFetchTimer.cancel();
+    super.dispose();
+  }
 
   Future<bool?> showExitDialog(BuildContext context) {
     return showDialog<bool>(
@@ -112,6 +112,13 @@ class _AssignScreenState extends State<AssignScreen> {
 
   void fetchCards() async {
     await DataService.fetchScannedCards();
+    setState(() {});
+  }
+
+  void deleteCard(String uid) async {
+    await DataService.deleteScannedCard(uid);
+    await DataService.fetchScannedCards();
+    setState(() {});
   }
 
   @override
@@ -136,13 +143,20 @@ class _AssignScreenState extends State<AssignScreen> {
                 children: [
                   Image.asset('assets/idna_logo.png', height: 60),
                   Spacer(),
-                  IconButton(
+                  /*IconButton(
                     icon: const Icon(Icons.refresh),
                     onPressed: () {
                       fetchCards();
                     },
                   ),
                   Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      deleteCard('234200256075');
+                    },
+                  ),
+                  Spacer(),*/
                   Image.asset('assets/agri_logo.png', height: 100),
                 ],
               ),
@@ -229,8 +243,13 @@ class _AssignScreenState extends State<AssignScreen> {
                                       Expanded(
                                         child: ListView(
                                           children: [
-                                            for (String uid in uids)
-                                              RfidCard(uid: uid),
+                                            for (String uid in DataService.uids)
+                                              RfidCard(
+                                                uid: uid,
+                                                onDelete: () {
+                                                  deleteCard(uid);
+                                                },
+                                              ),
                                           ],
                                         ),
                                       ),
