@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:idna_food/screens/assign_screen/assign_screen.dart';
+import 'package:idna_food/screens/splash_screen/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Idna Food',
-      home: AssignScreen(),
+      home: SplashScreen(),
     );
   }
 }
